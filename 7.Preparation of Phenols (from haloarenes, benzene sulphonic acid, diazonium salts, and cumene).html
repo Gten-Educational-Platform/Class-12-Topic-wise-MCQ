@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title> Quiz – Preparation of Phenols (from haloarenes, benzene sulphonic acid, diazonium salts, and cumene)</title>
+  <style>
+    body{font-family:Arial, sans-serif;padding:20px;background:#121212;color:#f0f0f0;}
+    #logo{display:block;margin:0 auto 25px;max-width:180px;}
+    #name-container{background:#1e1e1e;padding:30px;border-radius:6px;max-width:420px;margin:0 auto;}
+    #name-container input{width:100%;padding:10px;margin:10px 0 15px;border:none;border-radius:4px;font-size:16px;}
+    #quiz-container{display:none;}
+    .question{border:1px solid #333;padding:15px;margin-bottom:20px;border-radius:5px;background:#1e1e1e;}
+    .question h3{margin:0 0 10px;}
+    .options label{display:block;margin-bottom:5px;padding:5px;border-radius:4px;background:#2a2a2a;color:#ccc;cursor:pointer;}
+    .submit-button,.toggle-button,.dontknow-button{margin-top:10px;padding:6px 12px;background:#007BFF;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-right:5px;}
+    .solution{display:none;margin-top:10px;background:#2d2d2d;padding:10px;border-left:4px solid #28a745;}
+    #scorecard{background:#2d2d2d;padding:15px;border-radius:6px;margin-top:30px;display:none;}
+    #timer{font-weight:bold;color:#00ffcc;}
+    #studentPrintName{text-align:center;font-size:18px;font-weight:bold;margin-top:-15px;margin-bottom:5px;display:none;}
+    #examDateTime{text-align:center;font-size:14px;margin-bottom:20px;display:none;}
+    @media print {
+      body { background: #fff; color:#000; }
+      .submit-button, .dontknow-button, .toggle-button { display:none !important; }
+      #name-container { display:none !important; }
+    }
+  </style>
+  <!-- MathJax -->
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<img id="logo" src="https://i.ibb.co/WNZTWPwv/LOGO-PNG-2025-fab.png" alt="Logo" />
+
+<div id="studentPrintName"></div>
+<div id="examDateTime"></div>
+
+<div id="name-container">
+  <h2>Enter your name to begin</h2>
+  <input type="text" id="studentNameInput" placeholder="Your Name" />
+  <button class="submit-button" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div id="quiz-container">
+  <h2> Quiz – Preparation of Phenols (from haloarenes, benzene sulphonic acid, diazonium salts, and cumene)</h2>
+  <p><strong>Time Elapsed:</strong> <span id="timer">00:00</span></p>
+  <div id="questions-container"></div>
+
+  <div style="margin-top:30px;">
+    <button class="submit-button" onclick="finalSubmit()">Final Submit</button>
+    <button class="submit-button" onclick="printQuestions()">Print Questions</button>
+    <button class="submit-button" id="printScoreBtn" onclick="printScorecard()" style="display:none;">SHARE Scorecard</button>
+    <!-- 🔹 New PDF button -->
+    <button class="submit-button" id="pdfBtn" onclick="downloadPDF()" style="display:none;">Download PDF</button>
+  </div>
+
+ <div id="scorecard">
+  <h3>Your Scorecard</h3>
+  <p id="scoreText"></p>
+  <!-- ✅ Table instead of plain text -->
+  <table id="scoreTable" border="1" cellspacing="0" cellpadding="6" style="width:100%;border-collapse:collapse;margin-top:15px;">
+    <thead style="background:#333;color:#fff;">
+      <tr>
+        <th>Q.No</th>
+        <th>Question</th>
+        <th>Your Answer</th>
+        <th>Correct Answer</th>
+        <th>Result</th>
+        <th>Solution</th>
+      </tr>
+    </thead>
+    <tbody id="scoreDetails"></tbody>
+  </table>
+</div>
+
+
+<script>
+const Q = [
+  {
+    "id": "q1",
+    "text": "Phenol can be prepared from chlorobenzene by reaction with NaOH at high temperature and pressure. What is this method called?",
+    "options": ["Dow’s process", "Reimer–Tiemann reaction", "Gattermann reaction", "Kolbe’s reaction"],
+    "correct": "A",
+    "solution": "Dow’s process involves treating chlorobenzene with aqueous NaOH at 623 K and 300 atm to produce phenol."
+  },
+  {
+    "id": "q2",
+    "text": "Which condition is required in the Dow’s process for preparing phenol from chlorobenzene?",
+    "options": ["Low temperature and low pressure", "High temperature and high pressure", "UV light", "Room temperature"],
+    "correct": "B",
+    "solution": "Chlorobenzene + NaOH requires 623 K and 300 atm to yield phenol."
+  },
+  {
+    "id": "q3",
+    "text": "The intermediate formed in the Dow’s process for preparation of phenol from chlorobenzene is:",
+    "options": ["Phenoxide ion", "Benzyne", "Nitrobenzene", "Benzyl alcohol"],
+    "correct": "B",
+    "solution": "The reaction proceeds via the formation of benzyne intermediate which then reacts with hydroxide ion."
+  },
+  {
+    "id": "q4",
+    "text": "Benzene sulphonic acid on fusion with NaOH at high temperature gives:",
+    "options": ["Benzyl alcohol", "Phenol", "Aniline", "Benzaldehyde"],
+    "correct": "B",
+    "solution": "C₆H₅SO₃H + 2NaOH (fusion) → C₆H₅ONa → on acidification → phenol."
+  },
+  {
+    "id": "q5",
+    "text": "The conversion of benzene sulphonic acid to phenol involves:",
+    "options": ["Nucleophilic substitution", "Electrophilic substitution", "Elimination", "Oxidation"],
+    "correct": "A",
+    "solution": "It is a nucleophilic substitution process where –SO₃H group is replaced by –OH."
+  },
+  {
+    "id": "q6",
+    "text": "Benzenediazonium chloride (C₆H₅N₂⁺Cl⁻) on hydrolysis with warm water gives:",
+    "options": ["Aniline", "Phenol", "Benzyl alcohol", "Benzaldehyde"],
+    "correct": "B",
+    "solution": "C₆H₅N₂⁺Cl⁻ + H₂O → C₆H₅OH + N₂(g) + HCl."
+  },
+  {
+    "id": "q7",
+    "text": "The hydrolysis of diazonium salts to phenols involves:",
+    "options": ["Oxidation", "Reduction", "Elimination of nitrogen gas", "Addition"],
+    "correct": "C",
+    "solution": "The reaction liberates nitrogen gas, which drives the reaction forward."
+  },
+  {
+    "id": "q8",
+    "text": "Phenol is industrially prepared from cumene by oxidation. What is the intermediate formed?",
+    "options": ["Cumene hydroperoxide", "Acetone", "Benzaldehyde", "Toluene"],
+    "correct": "A",
+    "solution": "Cumene (isopropylbenzene) is oxidized with O₂ to cumene hydroperoxide, which on acid cleavage gives phenol and acetone."
+  },
+  {
+    "id": "q9",
+    "text": "In the cumene process, along with phenol, the by-product formed is:",
+    "options": ["Methanol", "Benzaldehyde", "Acetone", "Aniline"],
+    "correct": "C",
+    "solution": "Cumene hydroperoxide undergoes cleavage to give phenol and acetone as by-products."
+  },
+  {
+    "id": "q10",
+    "text": "Which of the following methods is most widely used for the industrial production of phenol?",
+    "options": ["From haloarenes (Dow’s process)", "From benzene sulphonic acid", "From diazonium salt hydrolysis", "From cumene process"],
+    "correct": "D",
+    "solution": "The cumene process is the most important industrial method due to acetone being a useful by-product."
+  },
+  {
+    "id": "q11",
+    "text": "Why is Dow’s process not widely used in industry for phenol production?",
+    "options": ["It requires high temperature and pressure", "It produces harmful gases", "It forms too many by-products", "It gives low yield"],
+    "correct": "A",
+    "solution": "Dow’s process needs drastic conditions (623 K, 300 atm), making it less economical compared to cumene process."
+  },
+  {
+    "id": "q12",
+    "text": "What gas is liberated when benzenediazonium chloride is hydrolyzed to phenol?",
+    "options": ["H₂", "N₂", "O₂", "Cl₂"],
+    "correct": "B",
+    "solution": "Benzenediazonium chloride hydrolyzes to phenol with liberation of N₂ gas."
+  },
+  {
+    "id": "q13",
+    "text": "Which sequence of reactions correctly represents preparation of phenol from benzene sulphonic acid?",
+    "options": ["Sulphonation → Neutralization → Fusion with NaOH → Acidification", "Sulphonation → Oxidation → Acidification", "Nitration → Reduction → Hydrolysis", "Sulphonation → Friedel–Crafts reaction"],
+    "correct": "A",
+    "solution": "Benzene → sulphonation → benzene sulphonic acid → fusion with NaOH → sodium phenoxide → acidification → phenol."
+  },
+  {
+    "id": "q14",
+    "text": "The major driving force in conversion of diazonium salts to phenols is:",
+    "options": ["Exothermic hydration", "Evolution of stable N₂ gas", "Formation of HCl", "High pressure"],
+    "correct": "B",
+    "solution": "The liberation of nitrogen gas (very stable) drives the reaction forward."
+  },
+  {
+    "id": "q15",
+    "text": "Which of the following is a key advantage of the cumene process?",
+    "options": ["It produces phenol in pure form only", "It gives both phenol and useful acetone", "It requires only mild conditions", "It avoids use of NaOH"],
+    "correct": "B",
+    "solution": "The cumene process is economical because both phenol and acetone are industrially important products."
+  }
+]
+;
+
+let student = '';
+let timerHandle;
+let printMode = '';
+let examDateTime = '';
+
+function startQuiz() {
+  const name = document.getElementById('studentNameInput').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  student = name;
+  examDateTime = new Date().toLocaleString();
+  document.getElementById('name-container').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+  buildQuestions();
+  if (window.MathJax) MathJax.typesetPromise();
+  startTimer();
+}
+
+function buildQuestions() {
+  const out = document.getElementById('questions-container');
+  out.innerHTML = '';
+  Q.forEach((q, index) => {
+    const optionsHTML = q.options.map((opt, i) => {
+      const letter = String.fromCharCode(65 + i);
+      return `<label><input type="radio" name="${q.id}" value="${letter}" onchange="enableSubmit('${q.id}')"> ${letter}. ${opt}</label>`;
+    }).join('');
+    out.insertAdjacentHTML('beforeend', `
+      <div class="question" id="${q.id}-wrap">
+        <h3>Q${index + 1}. ${q.text}</h3>
+        <div class="options">${optionsHTML}</div>
+        <div id="${q.id}-buttons">
+          <button id="sub-${q.id}" class="submit-button" disabled onclick="grade('${q.id}')">Submit</button>
+          <button class="dontknow-button" onclick="skip('${q.id}')">I Don’t Know</button>
+        </div>
+        <button class="toggle-button" id="btn-sol-${q.id}" style="display:none;" onclick="toggleSolution('sol-${q.id}')">Show Solution</button>
+        <div class="solution" id="sol-${q.id}"><strong>Solution:</strong> ${q.solution}</div>
+      </div>
+    `);
+  });
+}
+
+function enableSubmit(qid) { document.getElementById(`sub-${qid}`).disabled = false; }
+function grade(qid) {
+  const answerKey = Q.find(q => q.id === qid).correct;
+  const chosen = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!chosen) return;
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(input => {
+    const lbl = input.parentElement;
+    lbl.style.background = '#2a2a2a'; lbl.style.color = '#ccc'; input.disabled = true;
+    if (input.checked) {
+      lbl.style.background = input.value === answerKey ? '#28a745' : '#dc3545';
+      lbl.style.color = '#fff';
+    }
+  });
+  showSolutionButton(qid);
+}
+function skip(qid) {
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(r => r.disabled = true);
+  showSolutionButton(qid);
+}
+function showSolutionButton(qid) {
+  document.getElementById(`btn-sol-${qid}`).style.display = 'inline-block';
+  document.getElementById(`${qid}-buttons`).style.display = 'none';
+}
+function toggleSolution(id) {
+  const elem = document.getElementById(id);
+  elem.style.display = elem.style.display === 'block' ? 'none' : 'block';
+}
+
+function startTimer() {
+  const display = document.getElementById('timer');
+  const started = Date.now();
+  timerHandle = setInterval(() => {
+    const s = Math.floor((Date.now() - started) / 1000);
+    display.textContent = `${String((s / 60) | 0).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  }, 1000);
+}
+
+function finalSubmit() {
+  clearInterval(timerHandle);
+  let score = 0, detailHTML = '';
+  Q.forEach((q, index) => {
+    const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+    const chosen = checked ? checked.value : 'Not Answered';
+    const correct = (chosen === q.correct);
+    if (correct) score++;
+
+    detailHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${q.text}</td>
+        <td>${chosen}</td>
+        <td>${q.correct}</td>
+        <td>${correct ? '✅ Correct' : '❌ Incorrect'}</td>
+        <td>${q.solution}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('scoreText').innerText = `${student}, you scored ${score}/${Q.length}.`;
+  document.getElementById('scoreDetails').innerHTML = detailHTML;
+  document.getElementById('scorecard').style.display = 'block';
+  document.getElementById('printScoreBtn').style.display = 'inline-block';
+  document.getElementById('pdfBtn').style.display = 'inline-block'; // show PDF button
+}
+
+
+/* Print */
+function printQuestions() { printMode = "questions"; window.print(); }
+function printScorecard() {
+  document.getElementById("studentPrintName").innerText = student;
+  document.getElementById("examDateTime").innerText = "Exam Date & Time: " + examDateTime;
+  printMode = "scorecard"; window.print();
+}
+window.addEventListener('beforeprint', () => {
+  if (printMode === "questions") {
+    document.querySelector("#questions-container").style.display = "block";
+    document.querySelector("#scorecard").style.display = "none";
+    document.querySelector("#logo").style.display = "none";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#timer").style.display = "none";  
+    document.querySelector("#studentPrintName").style.display = "none";
+    document.querySelector("#examDateTime").style.display = "none";
+  }
+  if (printMode === "scorecard") {
+    document.querySelector("#questions-container").style.display = "none";
+    document.querySelector("#scorecard").style.display = "block";
+    document.querySelector("#logo").style.display = "block";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "block";
+    document.querySelector("#examDateTime").style.display = "block";
+  }
+});
+window.addEventListener('afterprint', () => {
+  document.querySelector("#questions-container").style.display = "";
+  document.querySelector("#scorecard").style.display = "";
+  document.querySelector("#logo").style.display = "";
+  document.querySelector("#name-container").style.display = "";
+  document.querySelector("#timer").style.display = "";   
+  document.querySelector("#studentPrintName").style.display = "none";
+  document.querySelector("#examDateTime").style.display = "none";
+});
+
+
+/* 🔹 Download PDF without Solution column */
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape" }); // Landscape mode
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Title
+  doc.setFontSize(16);
+  doc.text("Quiz Scorecard", pageWidth / 2, 15, { align: "center" });
+
+  // Student Info
+  doc.setFontSize(12);
+  doc.text("Name: " + student, 14, 30);
+  doc.text("Exam Date & Time: " + examDateTime, 14, 38);
+  doc.text(document.getElementById('scoreText').innerText, 14, 46);
+
+  // Extract table rows (skip last cell = Solution)
+  let rows = [];
+  document.querySelectorAll("#scoreDetails tr").forEach(tr => {
+    let row = [];
+    tr.querySelectorAll("td").forEach((td, idx) => {
+      if (idx < 5) row.push(td.innerText); // ✅ only first 5 columns
+    });
+    rows.push(row);
+  });
+
+  // AutoTable without Solution column
+  doc.autoTable({
+    startY: 55,
+    head: [['Q.No', 'Question', 'Your Answer', 'Correct Answer', 'Result']],
+    body: rows,
+    theme: 'grid',
+    headStyles: { fillColor: [41, 128, 185] },
+    styles: {
+      fontSize: 9,
+      cellPadding: 3,
+      valign: 'top',
+      overflow: 'linebreak'
+    },
+    columnStyles: {
+      0: { cellWidth: 15 },   // Q.No
+      1: { cellWidth: 190 },  // Question
+      2: { cellWidth: 20 },   // Your Ans
+      3: { cellWidth: 15 },   // Correct Ans
+      4: { cellWidth: 30 }    // Result
+    },
+    didParseCell: function (data) {
+      const text = data.cell.text.join(" ");
+      const cellWidth = data.cell.width - 6;
+      const textWidth = doc.getTextWidth(text);
+      if (textWidth > cellWidth) {
+        let scale = cellWidth / textWidth;
+        data.cell.styles.fontSize = Math.max(6, data.cell.styles.fontSize * scale);
+      }
+    }
+  });
+
+  // Save PDF
+  doc.save(student + "_Scorecard.pdf");
+}
+</script>
+
+
+</body>
+</html>

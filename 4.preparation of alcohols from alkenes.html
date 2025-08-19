@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title> Quiz – preparation of alcohols from alkenes</title>
+  <style>
+    body{font-family:Arial, sans-serif;padding:20px;background:#121212;color:#f0f0f0;}
+    #logo{display:block;margin:0 auto 25px;max-width:180px;}
+    #name-container{background:#1e1e1e;padding:30px;border-radius:6px;max-width:420px;margin:0 auto;}
+    #name-container input{width:100%;padding:10px;margin:10px 0 15px;border:none;border-radius:4px;font-size:16px;}
+    #quiz-container{display:none;}
+    .question{border:1px solid #333;padding:15px;margin-bottom:20px;border-radius:5px;background:#1e1e1e;}
+    .question h3{margin:0 0 10px;}
+    .options label{display:block;margin-bottom:5px;padding:5px;border-radius:4px;background:#2a2a2a;color:#ccc;cursor:pointer;}
+    .submit-button,.toggle-button,.dontknow-button{margin-top:10px;padding:6px 12px;background:#007BFF;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-right:5px;}
+    .solution{display:none;margin-top:10px;background:#2d2d2d;padding:10px;border-left:4px solid #28a745;}
+    #scorecard{background:#2d2d2d;padding:15px;border-radius:6px;margin-top:30px;display:none;}
+    #timer{font-weight:bold;color:#00ffcc;}
+    #studentPrintName{text-align:center;font-size:18px;font-weight:bold;margin-top:-15px;margin-bottom:5px;display:none;}
+    #examDateTime{text-align:center;font-size:14px;margin-bottom:20px;display:none;}
+    @media print {
+      body { background: #fff; color:#000; }
+      .submit-button, .dontknow-button, .toggle-button { display:none !important; }
+      #name-container { display:none !important; }
+    }
+  </style>
+  <!-- MathJax -->
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<img id="logo" src="https://i.ibb.co/WNZTWPwv/LOGO-PNG-2025-fab.png" alt="Logo" />
+
+<div id="studentPrintName"></div>
+<div id="examDateTime"></div>
+
+<div id="name-container">
+  <h2>Enter your name to begin</h2>
+  <input type="text" id="studentNameInput" placeholder="Your Name" />
+  <button class="submit-button" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div id="quiz-container">
+  <h2> Quiz – preparation of alcohols from alkenes</h2>
+  <p><strong>Time Elapsed:</strong> <span id="timer">00:00</span></p>
+  <div id="questions-container"></div>
+
+  <div style="margin-top:30px;">
+    <button class="submit-button" onclick="finalSubmit()">Final Submit</button>
+    <button class="submit-button" onclick="printQuestions()">Print Questions</button>
+    <button class="submit-button" id="printScoreBtn" onclick="printScorecard()" style="display:none;">SHARE Scorecard</button>
+    <!-- 🔹 New PDF button -->
+    <button class="submit-button" id="pdfBtn" onclick="downloadPDF()" style="display:none;">Download PDF</button>
+  </div>
+
+ <div id="scorecard">
+  <h3>Your Scorecard</h3>
+  <p id="scoreText"></p>
+  <!-- ✅ Table instead of plain text -->
+  <table id="scoreTable" border="1" cellspacing="0" cellpadding="6" style="width:100%;border-collapse:collapse;margin-top:15px;">
+    <thead style="background:#333;color:#fff;">
+      <tr>
+        <th>Q.No</th>
+        <th>Question</th>
+        <th>Your Answer</th>
+        <th>Correct Answer</th>
+        <th>Result</th>
+        <th>Solution</th>
+      </tr>
+    </thead>
+    <tbody id="scoreDetails"></tbody>
+  </table>
+</div>
+
+
+<script>
+const Q = [
+  {
+    "id": "q1",
+    "text": "In acid-catalyzed hydration of alkenes, which rule governs the orientation of OH group addition?",
+    "options": ["Markovnikov's rule", "Anti-Markovnikov's rule", "Saytzeff's rule", "Huckel's rule"],
+    "correct": "A",
+    "solution": "In acid-catalyzed hydration, the addition of water follows Markovnikov's rule: OH attaches to the more substituted carbon of the double bond."
+  },
+  {
+    "id": "q2",
+    "text": "Which intermediate is formed during acid-catalyzed hydration of alkenes?",
+    "options": ["Carbocation", "Free radical", "Carbanion", "Cyclic transition state"],
+    "correct": "A",
+    "solution": "The reaction proceeds through a carbocation intermediate, which explains the regioselectivity and possibility of rearrangements."
+  },
+  {
+    "id": "q3",
+    "text": "Propene on acid-catalyzed hydration gives which major product?",
+    "options": ["1-propanol", "2-propanol", "propanone", "isopropyl ether"],
+    "correct": "B",
+    "solution": "According to Markovnikov’s rule, OH attaches to the more substituted carbon, giving 2-propanol as the major product."
+  },
+  {
+    "id": "q4",
+    "text": "Hydroboration-oxidation of alkenes gives alcohols that follow:",
+    "options": ["Markovnikov’s rule", "Anti-Markovnikov’s rule", "Saytzeff’s elimination rule", "Resonance stabilization"],
+    "correct": "B",
+    "solution": "Hydroboration-oxidation gives anti-Markovnikov alcohols, i.e., OH attaches to the less substituted carbon."
+  },
+  {
+    "id": "q5",
+    "text": "Which reagent combination is used in hydroboration–oxidation of alkenes?",
+    "options": [
+      "BH₃·THF followed by H₂O₂/OH⁻",
+      "H₂SO₄ and H₂O",
+      "O₃ followed by Zn/H₂O",
+      "HBr and ROOR"
+    ],
+    "correct": "A",
+    "solution": "Hydroboration-oxidation involves the addition of BH₃·THF to the double bond, followed by oxidation using H₂O₂ in basic medium."
+  },
+  {
+    "id": "q6",
+    "text": "What is the product when 1-butene undergoes hydroboration–oxidation?",
+    "options": ["1-butanol", "2-butanol", "butanone", "tert-butanol"],
+    "correct": "A",
+    "solution": "Hydroboration–oxidation follows anti-Markovnikov’s rule. 1-butene gives 1-butanol as the major product."
+  },
+  {
+    "id": "q7",
+    "text": "During hydroboration–oxidation, boron initially attaches to:",
+    "options": ["The more substituted carbon of the double bond", "The less substituted carbon of the double bond", "Randomly to either carbon", "Both carbons simultaneously"],
+    "correct": "B",
+    "solution": "Boron attaches to the less substituted carbon due to steric and electronic factors. Later, OH replaces boron at that position."
+  },
+  {
+    "id": "q8",
+    "text": "Which of the following alkenes will give only one alcohol upon acid-catalyzed hydration?",
+    "options": ["Propene", "2-methylpropene", "Cyclohexene", "1-butene"],
+    "correct": "C",
+    "solution": "Cyclohexene gives cyclohexanol as the only product since both carbons of the double bond are equivalent."
+  },
+  {
+    "id": "q9",
+    "text": "Which method of alcohol preparation avoids carbocation rearrangements?",
+    "options": [
+      "Acid-catalyzed hydration",
+      "Hydroboration–oxidation",
+      "Both methods show rearrangement",
+      "Neither method involves rearrangement"
+    ],
+    "correct": "B",
+    "solution": "Acid-catalyzed hydration proceeds via carbocation intermediates, so rearrangements are possible. Hydroboration–oxidation avoids rearrangements as it proceeds through a concerted mechanism."
+  },
+  {
+    "id": "q10",
+    "text": "Calculate the major product when 2-methylpropene (isobutene) undergoes acid-catalyzed hydration.",
+    "options": ["2-methyl-1-propanol", "2-methyl-2-propanol", "1-butanol", "tert-butanol"],
+    "correct": "D",
+    "solution": "2-methylpropene gives tert-butanol (2-methyl-2-propanol) as the major product on acid-catalyzed hydration because OH attaches to the more substituted carbon."
+  }
+]
+;
+
+let student = '';
+let timerHandle;
+let printMode = '';
+let examDateTime = '';
+
+function startQuiz() {
+  const name = document.getElementById('studentNameInput').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  student = name;
+  examDateTime = new Date().toLocaleString();
+  document.getElementById('name-container').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+  buildQuestions();
+  if (window.MathJax) MathJax.typesetPromise();
+  startTimer();
+}
+
+function buildQuestions() {
+  const out = document.getElementById('questions-container');
+  out.innerHTML = '';
+  Q.forEach((q, index) => {
+    const optionsHTML = q.options.map((opt, i) => {
+      const letter = String.fromCharCode(65 + i);
+      return `<label><input type="radio" name="${q.id}" value="${letter}" onchange="enableSubmit('${q.id}')"> ${letter}. ${opt}</label>`;
+    }).join('');
+    out.insertAdjacentHTML('beforeend', `
+      <div class="question" id="${q.id}-wrap">
+        <h3>Q${index + 1}. ${q.text}</h3>
+        <div class="options">${optionsHTML}</div>
+        <div id="${q.id}-buttons">
+          <button id="sub-${q.id}" class="submit-button" disabled onclick="grade('${q.id}')">Submit</button>
+          <button class="dontknow-button" onclick="skip('${q.id}')">I Don’t Know</button>
+        </div>
+        <button class="toggle-button" id="btn-sol-${q.id}" style="display:none;" onclick="toggleSolution('sol-${q.id}')">Show Solution</button>
+        <div class="solution" id="sol-${q.id}"><strong>Solution:</strong> ${q.solution}</div>
+      </div>
+    `);
+  });
+}
+
+function enableSubmit(qid) { document.getElementById(`sub-${qid}`).disabled = false; }
+function grade(qid) {
+  const answerKey = Q.find(q => q.id === qid).correct;
+  const chosen = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!chosen) return;
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(input => {
+    const lbl = input.parentElement;
+    lbl.style.background = '#2a2a2a'; lbl.style.color = '#ccc'; input.disabled = true;
+    if (input.checked) {
+      lbl.style.background = input.value === answerKey ? '#28a745' : '#dc3545';
+      lbl.style.color = '#fff';
+    }
+  });
+  showSolutionButton(qid);
+}
+function skip(qid) {
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(r => r.disabled = true);
+  showSolutionButton(qid);
+}
+function showSolutionButton(qid) {
+  document.getElementById(`btn-sol-${qid}`).style.display = 'inline-block';
+  document.getElementById(`${qid}-buttons`).style.display = 'none';
+}
+function toggleSolution(id) {
+  const elem = document.getElementById(id);
+  elem.style.display = elem.style.display === 'block' ? 'none' : 'block';
+}
+
+function startTimer() {
+  const display = document.getElementById('timer');
+  const started = Date.now();
+  timerHandle = setInterval(() => {
+    const s = Math.floor((Date.now() - started) / 1000);
+    display.textContent = `${String((s / 60) | 0).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  }, 1000);
+}
+
+function finalSubmit() {
+  clearInterval(timerHandle);
+  let score = 0, detailHTML = '';
+  Q.forEach((q, index) => {
+    const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+    const chosen = checked ? checked.value : 'Not Answered';
+    const correct = (chosen === q.correct);
+    if (correct) score++;
+
+    detailHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${q.text}</td>
+        <td>${chosen}</td>
+        <td>${q.correct}</td>
+        <td>${correct ? '✅ Correct' : '❌ Incorrect'}</td>
+        <td>${q.solution}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('scoreText').innerText = `${student}, you scored ${score}/${Q.length}.`;
+  document.getElementById('scoreDetails').innerHTML = detailHTML;
+  document.getElementById('scorecard').style.display = 'block';
+  document.getElementById('printScoreBtn').style.display = 'inline-block';
+  document.getElementById('pdfBtn').style.display = 'inline-block'; // show PDF button
+}
+
+
+/* Print */
+function printQuestions() { printMode = "questions"; window.print(); }
+function printScorecard() {
+  document.getElementById("studentPrintName").innerText = student;
+  document.getElementById("examDateTime").innerText = "Exam Date & Time: " + examDateTime;
+  printMode = "scorecard"; window.print();
+}
+window.addEventListener('beforeprint', () => {
+  if (printMode === "questions") {
+    document.querySelector("#questions-container").style.display = "block";
+    document.querySelector("#scorecard").style.display = "none";
+    document.querySelector("#logo").style.display = "none";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#timer").style.display = "none";  
+    document.querySelector("#studentPrintName").style.display = "none";
+    document.querySelector("#examDateTime").style.display = "none";
+  }
+  if (printMode === "scorecard") {
+    document.querySelector("#questions-container").style.display = "none";
+    document.querySelector("#scorecard").style.display = "block";
+    document.querySelector("#logo").style.display = "block";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "block";
+    document.querySelector("#examDateTime").style.display = "block";
+  }
+});
+window.addEventListener('afterprint', () => {
+  document.querySelector("#questions-container").style.display = "";
+  document.querySelector("#scorecard").style.display = "";
+  document.querySelector("#logo").style.display = "";
+  document.querySelector("#name-container").style.display = "";
+  document.querySelector("#timer").style.display = "";   
+  document.querySelector("#studentPrintName").style.display = "none";
+  document.querySelector("#examDateTime").style.display = "none";
+});
+
+
+/* 🔹 Download PDF without Solution column */
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape" }); // Landscape mode
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Title
+  doc.setFontSize(16);
+  doc.text("Quiz Scorecard", pageWidth / 2, 15, { align: "center" });
+
+  // Student Info
+  doc.setFontSize(12);
+  doc.text("Name: " + student, 14, 30);
+  doc.text("Exam Date & Time: " + examDateTime, 14, 38);
+  doc.text(document.getElementById('scoreText').innerText, 14, 46);
+
+  // Extract table rows (skip last cell = Solution)
+  let rows = [];
+  document.querySelectorAll("#scoreDetails tr").forEach(tr => {
+    let row = [];
+    tr.querySelectorAll("td").forEach((td, idx) => {
+      if (idx < 5) row.push(td.innerText); // ✅ only first 5 columns
+    });
+    rows.push(row);
+  });
+
+  // AutoTable without Solution column
+  doc.autoTable({
+    startY: 55,
+    head: [['Q.No', 'Question', 'Your Answer', 'Correct Answer', 'Result']],
+    body: rows,
+    theme: 'grid',
+    headStyles: { fillColor: [41, 128, 185] },
+    styles: {
+      fontSize: 9,
+      cellPadding: 3,
+      valign: 'top',
+      overflow: 'linebreak'
+    },
+    columnStyles: {
+      0: { cellWidth: 15 },   // Q.No
+      1: { cellWidth: 190 },  // Question
+      2: { cellWidth: 20 },   // Your Ans
+      3: { cellWidth: 15 },   // Correct Ans
+      4: { cellWidth: 30 }    // Result
+    },
+    didParseCell: function (data) {
+      const text = data.cell.text.join(" ");
+      const cellWidth = data.cell.width - 6;
+      const textWidth = doc.getTextWidth(text);
+      if (textWidth > cellWidth) {
+        let scale = cellWidth / textWidth;
+        data.cell.styles.fontSize = Math.max(6, data.cell.styles.fontSize * scale);
+      }
+    }
+  });
+
+  // Save PDF
+  doc.save(student + "_Scorecard.pdf");
+}
+</script>
+
+
+</body>
+</html>

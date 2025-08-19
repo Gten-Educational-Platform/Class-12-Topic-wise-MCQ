@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title> Quiz – Chemical reactions of phenols-Kolbe’s reaction, Reimer–Tiemann reaction, Reaction of phenol with zinc dust, Oxidation by Na₂Cr₂O₇</title>
+  <style>
+    body{font-family:Arial, sans-serif;padding:20px;background:#121212;color:#f0f0f0;}
+    #logo{display:block;margin:0 auto 25px;max-width:180px;}
+    #name-container{background:#1e1e1e;padding:30px;border-radius:6px;max-width:420px;margin:0 auto;}
+    #name-container input{width:100%;padding:10px;margin:10px 0 15px;border:none;border-radius:4px;font-size:16px;}
+    #quiz-container{display:none;}
+    .question{border:1px solid #333;padding:15px;margin-bottom:20px;border-radius:5px;background:#1e1e1e;}
+    .question h3{margin:0 0 10px;}
+    .options label{display:block;margin-bottom:5px;padding:5px;border-radius:4px;background:#2a2a2a;color:#ccc;cursor:pointer;}
+    .submit-button,.toggle-button,.dontknow-button{margin-top:10px;padding:6px 12px;background:#007BFF;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-right:5px;}
+    .solution{display:none;margin-top:10px;background:#2d2d2d;padding:10px;border-left:4px solid #28a745;}
+    #scorecard{background:#2d2d2d;padding:15px;border-radius:6px;margin-top:30px;display:none;}
+    #timer{font-weight:bold;color:#00ffcc;}
+    #studentPrintName{text-align:center;font-size:18px;font-weight:bold;margin-top:-15px;margin-bottom:5px;display:none;}
+    #examDateTime{text-align:center;font-size:14px;margin-bottom:20px;display:none;}
+    @media print {
+      body { background: #fff; color:#000; }
+      .submit-button, .dontknow-button, .toggle-button { display:none !important; }
+      #name-container { display:none !important; }
+    }
+  </style>
+  <!-- MathJax -->
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<img id="logo" src="https://i.ibb.co/WNZTWPwv/LOGO-PNG-2025-fab.png" alt="Logo" />
+
+<div id="studentPrintName"></div>
+<div id="examDateTime"></div>
+
+<div id="name-container">
+  <h2>Enter your name to begin</h2>
+  <input type="text" id="studentNameInput" placeholder="Your Name" />
+  <button class="submit-button" onclick="startQuiz()">Start Quiz</button>
+</div>
+
+<div id="quiz-container">
+  <h2> Quiz – Chemical reactions of phenols-Kolbe’s reaction, Reimer–Tiemann reaction, Reaction of phenol with zinc dust, Oxidation by Na₂Cr₂O₇</h2>
+  <p><strong>Time Elapsed:</strong> <span id="timer">00:00</span></p>
+  <div id="questions-container"></div>
+
+  <div style="margin-top:30px;">
+    <button class="submit-button" onclick="finalSubmit()">Final Submit</button>
+    <button class="submit-button" onclick="printQuestions()">Print Questions</button>
+    <button class="submit-button" id="printScoreBtn" onclick="printScorecard()" style="display:none;">SHARE Scorecard</button>
+    <!-- 🔹 New PDF button -->
+    <button class="submit-button" id="pdfBtn" onclick="downloadPDF()" style="display:none;">Download PDF</button>
+  </div>
+
+ <div id="scorecard">
+  <h3>Your Scorecard</h3>
+  <p id="scoreText"></p>
+  <!-- ✅ Table instead of plain text -->
+  <table id="scoreTable" border="1" cellspacing="0" cellpadding="6" style="width:100%;border-collapse:collapse;margin-top:15px;">
+    <thead style="background:#333;color:#fff;">
+      <tr>
+        <th>Q.No</th>
+        <th>Question</th>
+        <th>Your Answer</th>
+        <th>Correct Answer</th>
+        <th>Result</th>
+        <th>Solution</th>
+      </tr>
+    </thead>
+    <tbody id="scoreDetails"></tbody>
+  </table>
+</div>
+
+
+<script>
+const Q = [
+  {
+    "id": "q1",
+    "question": "Kolbe’s reaction involves reaction of phenol with NaOH followed by CO₂ under pressure to give:",
+    "options": ["Salicylic acid", "Benzoic acid", "Phenylacetic acid", "Acetylsalicylic acid"],
+    "solution": "Salicylic acid (o-hydroxybenzoic acid)",
+    "type": "reaction"
+  },
+  {
+    "id": "q2",
+    "question": "Which intermediate is formed in Kolbe’s reaction?",
+    "options": ["Phenoxide ion", "Phenyl carbocation", "Phenyl radical", "Phenyl carbene"],
+    "solution": "Phenoxide ion",
+    "type": "conceptual"
+  },
+  {
+    "id": "q3",
+    "question": "Reimer–Tiemann reaction of phenol with CHCl₃ and NaOH gives:",
+    "options": ["Salicylaldehyde", "Benzoic acid", "Anisole", "Phenyl acetate"],
+    "solution": "Salicylaldehyde (o-hydroxybenzaldehyde)",
+    "type": "reaction"
+  },
+  {
+    "id": "q4",
+    "question": "What is the electrophile in Reimer–Tiemann reaction?",
+    "options": ["CCl₃⁻", "CCl₃⁺", ":CCl₂ (dichlorocarbene)", "Cl⁻"],
+    "solution": ":CCl₂ (dichlorocarbene)",
+    "type": "conceptual"
+  },
+  {
+    "id": "q5",
+    "question": "Phenol reacts with zinc dust upon heating to form:",
+    "options": ["Benzene", "Cyclohexane", "Toluene", "Anisole"],
+    "solution": "Benzene",
+    "type": "reaction"
+  },
+  {
+    "id": "q6",
+    "question": "Which statement explains the role of zinc dust in reaction with phenol?",
+    "options": [
+      "It oxidizes phenol",
+      "It reduces phenol to benzene by removing oxygen atom",
+      "It adds chlorine to phenol",
+      "It dehydrates phenol"
+    ],
+    "solution": "It reduces phenol to benzene by removing oxygen atom",
+    "type": "reasoning"
+  },
+  {
+    "id": "q7",
+    "question": "Oxidation of phenol using Na₂Cr₂O₇/H₂SO₄ produces:",
+    "options": ["Benzoquinone", "Catechol", "Hydroquinone", "Cyclohexanone"],
+    "solution": "Benzoquinone",
+    "type": "reaction"
+  },
+  {
+    "id": "q8",
+    "question": "In Kolbe’s reaction, why is the product mainly ortho substituted?",
+    "options": [
+      "Because CO₂ is bulky",
+      "Because phenoxide ion stabilizes ortho attack more due to H-bonding",
+      "Because para position is blocked",
+      "Because of steric hindrance at ortho position"
+    ],
+    "solution": "Because phenoxide ion stabilizes ortho attack more due to H-bonding",
+    "type": "reasoning"
+  },
+  {
+    "id": "q9",
+    "question": "What happens if phenol is oxidized mildly instead of strongly?",
+    "options": ["Catechol and hydroquinone are formed", "Benzoquinone is formed", "Benzaldehyde is formed", "Anisole is formed"],
+    "solution": "Catechol and hydroquinone are formed",
+    "type": "conceptual"
+  },
+  {
+    "id": "q10",
+    "question": "Reimer–Tiemann reaction fails if chloroform is replaced by dichloromethane because:",
+    "options": [
+      "CH₂Cl₂ does not form dichlorocarbene",
+      "It is a weaker solvent",
+      "It produces chloroform as byproduct",
+      "It produces phenoxide ion"
+    ],
+    "solution": "CH₂Cl₂ does not form dichlorocarbene",
+    "type": "reasoning"
+  },
+  {
+    "id": "q11",
+    "question": "Which of the following is obtained on oxidation of p-nitrophenol with Na₂Cr₂O₇?",
+    "options": ["p-Nitrobenzoquinone", "p-Aminophenol", "Nitrobenzene", "Benzoquinone"],
+    "solution": "p-Nitrobenzoquinone",
+    "type": "product-prediction"
+  },
+  {
+    "id": "q12",
+    "question": "Which reaction is used in the industrial preparation of salicylic acid (aspirin precursor)?",
+    "options": ["Kolbe’s reaction", "Reimer–Tiemann reaction", "Cannizzaro reaction", "Friedel–Crafts acylation"],
+    "solution": "Kolbe’s reaction",
+    "type": "conceptual"
+  },
+  {
+    "id": "q13",
+    "question": "What is the effect of using excess chloroform in Reimer–Tiemann reaction?",
+    "options": [
+      "Salicylaldehyde yield increases",
+      "Salicylic acid forms",
+      "Bis-formylation occurs giving dihydroxybenzaldehyde",
+      "No effect"
+    ],
+    "solution": "Bis-formylation occurs giving dihydroxybenzaldehyde",
+    "type": "reasoning"
+  },
+  {
+    "id": "q14",
+    "question": "What is the order of reactivity of phenol, benzene, and toluene towards Kolbe’s reaction?",
+    "options": ["Phenol > Toluene > Benzene", "Benzene > Phenol > Toluene", "Toluene > Benzene > Phenol", "All are same"],
+    "solution": "Phenol > Toluene > Benzene",
+    "type": "conceptual"
+  },
+  {
+    "id": "q15",
+    "question": "Why does phenol give a colored product upon oxidation with Na₂Cr₂O₇?",
+    "options": [
+      "Formation of benzoquinone with extended conjugation",
+      "Formation of benzyl carbocation",
+      "Formation of benzene",
+      "Formation of anisole"
+    ],
+    "solution": "Formation of benzoquinone with extended conjugation",
+    "type": "reasoning"
+  }
+]
+;
+
+let student = '';
+let timerHandle;
+let printMode = '';
+let examDateTime = '';
+
+function startQuiz() {
+  const name = document.getElementById('studentNameInput').value.trim();
+  if (!name) { alert('Please enter your name.'); return; }
+  student = name;
+  examDateTime = new Date().toLocaleString();
+  document.getElementById('name-container').style.display = 'none';
+  document.getElementById('quiz-container').style.display = 'block';
+  buildQuestions();
+  if (window.MathJax) MathJax.typesetPromise();
+  startTimer();
+}
+
+function buildQuestions() {
+  const out = document.getElementById('questions-container');
+  out.innerHTML = '';
+  Q.forEach((q, index) => {
+    const optionsHTML = q.options.map((opt, i) => {
+      const letter = String.fromCharCode(65 + i);
+      return `<label><input type="radio" name="${q.id}" value="${letter}" onchange="enableSubmit('${q.id}')"> ${letter}. ${opt}</label>`;
+    }).join('');
+    out.insertAdjacentHTML('beforeend', `
+      <div class="question" id="${q.id}-wrap">
+        <h3>Q${index + 1}. ${q.text}</h3>
+        <div class="options">${optionsHTML}</div>
+        <div id="${q.id}-buttons">
+          <button id="sub-${q.id}" class="submit-button" disabled onclick="grade('${q.id}')">Submit</button>
+          <button class="dontknow-button" onclick="skip('${q.id}')">I Don’t Know</button>
+        </div>
+        <button class="toggle-button" id="btn-sol-${q.id}" style="display:none;" onclick="toggleSolution('sol-${q.id}')">Show Solution</button>
+        <div class="solution" id="sol-${q.id}"><strong>Solution:</strong> ${q.solution}</div>
+      </div>
+    `);
+  });
+}
+
+function enableSubmit(qid) { document.getElementById(`sub-${qid}`).disabled = false; }
+function grade(qid) {
+  const answerKey = Q.find(q => q.id === qid).correct;
+  const chosen = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!chosen) return;
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(input => {
+    const lbl = input.parentElement;
+    lbl.style.background = '#2a2a2a'; lbl.style.color = '#ccc'; input.disabled = true;
+    if (input.checked) {
+      lbl.style.background = input.value === answerKey ? '#28a745' : '#dc3545';
+      lbl.style.color = '#fff';
+    }
+  });
+  showSolutionButton(qid);
+}
+function skip(qid) {
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(r => r.disabled = true);
+  showSolutionButton(qid);
+}
+function showSolutionButton(qid) {
+  document.getElementById(`btn-sol-${qid}`).style.display = 'inline-block';
+  document.getElementById(`${qid}-buttons`).style.display = 'none';
+}
+function toggleSolution(id) {
+  const elem = document.getElementById(id);
+  elem.style.display = elem.style.display === 'block' ? 'none' : 'block';
+}
+
+function startTimer() {
+  const display = document.getElementById('timer');
+  const started = Date.now();
+  timerHandle = setInterval(() => {
+    const s = Math.floor((Date.now() - started) / 1000);
+    display.textContent = `${String((s / 60) | 0).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  }, 1000);
+}
+
+function finalSubmit() {
+  clearInterval(timerHandle);
+  let score = 0, detailHTML = '';
+  Q.forEach((q, index) => {
+    const checked = document.querySelector(`input[name="${q.id}"]:checked`);
+    const chosen = checked ? checked.value : 'Not Answered';
+    const correct = (chosen === q.correct);
+    if (correct) score++;
+
+    detailHTML += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${q.text}</td>
+        <td>${chosen}</td>
+        <td>${q.correct}</td>
+        <td>${correct ? '✅ Correct' : '❌ Incorrect'}</td>
+        <td>${q.solution}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('scoreText').innerText = `${student}, you scored ${score}/${Q.length}.`;
+  document.getElementById('scoreDetails').innerHTML = detailHTML;
+  document.getElementById('scorecard').style.display = 'block';
+  document.getElementById('printScoreBtn').style.display = 'inline-block';
+  document.getElementById('pdfBtn').style.display = 'inline-block'; // show PDF button
+}
+
+
+/* Print */
+function printQuestions() { printMode = "questions"; window.print(); }
+function printScorecard() {
+  document.getElementById("studentPrintName").innerText = student;
+  document.getElementById("examDateTime").innerText = "Exam Date & Time: " + examDateTime;
+  printMode = "scorecard"; window.print();
+}
+window.addEventListener('beforeprint', () => {
+  if (printMode === "questions") {
+    document.querySelector("#questions-container").style.display = "block";
+    document.querySelector("#scorecard").style.display = "none";
+    document.querySelector("#logo").style.display = "none";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#timer").style.display = "none";  
+    document.querySelector("#studentPrintName").style.display = "none";
+    document.querySelector("#examDateTime").style.display = "none";
+  }
+  if (printMode === "scorecard") {
+    document.querySelector("#questions-container").style.display = "none";
+    document.querySelector("#scorecard").style.display = "block";
+    document.querySelector("#logo").style.display = "block";
+    document.querySelector("#name-container").style.display = "none";
+    document.querySelector("#studentPrintName").style.display = "block";
+    document.querySelector("#examDateTime").style.display = "block";
+  }
+});
+window.addEventListener('afterprint', () => {
+  document.querySelector("#questions-container").style.display = "";
+  document.querySelector("#scorecard").style.display = "";
+  document.querySelector("#logo").style.display = "";
+  document.querySelector("#name-container").style.display = "";
+  document.querySelector("#timer").style.display = "";   
+  document.querySelector("#studentPrintName").style.display = "none";
+  document.querySelector("#examDateTime").style.display = "none";
+});
+
+
+/* 🔹 Download PDF without Solution column */
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape" }); // Landscape mode
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Title
+  doc.setFontSize(16);
+  doc.text("Quiz Scorecard", pageWidth / 2, 15, { align: "center" });
+
+  // Student Info
+  doc.setFontSize(12);
+  doc.text("Name: " + student, 14, 30);
+  doc.text("Exam Date & Time: " + examDateTime, 14, 38);
+  doc.text(document.getElementById('scoreText').innerText, 14, 46);
+
+  // Extract table rows (skip last cell = Solution)
+  let rows = [];
+  document.querySelectorAll("#scoreDetails tr").forEach(tr => {
+    let row = [];
+    tr.querySelectorAll("td").forEach((td, idx) => {
+      if (idx < 5) row.push(td.innerText); // ✅ only first 5 columns
+    });
+    rows.push(row);
+  });
+
+  // AutoTable without Solution column
+  doc.autoTable({
+    startY: 55,
+    head: [['Q.No', 'Question', 'Your Answer', 'Correct Answer', 'Result']],
+    body: rows,
+    theme: 'grid',
+    headStyles: { fillColor: [41, 128, 185] },
+    styles: {
+      fontSize: 9,
+      cellPadding: 3,
+      valign: 'top',
+      overflow: 'linebreak'
+    },
+    columnStyles: {
+      0: { cellWidth: 15 },   // Q.No
+      1: { cellWidth: 190 },  // Question
+      2: { cellWidth: 20 },   // Your Ans
+      3: { cellWidth: 15 },   // Correct Ans
+      4: { cellWidth: 30 }    // Result
+    },
+    didParseCell: function (data) {
+      const text = data.cell.text.join(" ");
+      const cellWidth = data.cell.width - 6;
+      const textWidth = doc.getTextWidth(text);
+      if (textWidth > cellWidth) {
+        let scale = cellWidth / textWidth;
+        data.cell.styles.fontSize = Math.max(6, data.cell.styles.fontSize * scale);
+      }
+    }
+  });
+
+  // Save PDF
+  doc.save(student + "_Scorecard.pdf");
+}
+</script>
+
+
+</body>
+</html>
